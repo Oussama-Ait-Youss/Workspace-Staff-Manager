@@ -4,17 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="css/output.css">
     <link rel="stylesheet" href="css/style.css">
+
     <title>Staff Planner</title>
 </head>
 
 <body class="bg-gray-100">
 
-    <div class="flex h-screen">
-
+    <div class="flex flex-col md:flex-row h-screen">
         <!-- LEFT SIDE -->
-        <div class="w-1/3 bg-white shadow-lg p-4 flex flex-col justify-between">
+        <div class="w-full md:w-1/3 bg-white shadow-lg p-4 flex flex-col justify-between">
 
             <!-- Title -->
             <div>
@@ -30,12 +30,12 @@
             <button class="bg-blue-600 text-white py-3 rounded-lg shadow hover:bg-blue-700" id="add_staff">
                 + Add Staff
             </button>
-
         </div>
-
-        <div class="parent w-full h-full">
-            <div class="div1">
-                <p>Salle 1</p>
+        <!-- plan -->
+        <div class="parent w-full md:flex-1  hidden md:grid bg-gray-100">
+            <div class="div1 relative flex flex-col items-center justify-between bg-red-500">
+                <p class="text-center">Salle 1</p>
+                <button class="bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/3">+</button>
             </div>
             <div class="div2">
                 <p>Salle 2</p>
@@ -53,18 +53,120 @@
                 <p>Salle 6</p>
             </div>
             <div class="div7">
-                <p>Salle 7</p>
             </div>
             <div class="div8">
-                <p>Salle 8</p>
             </div>
         </div>
+        <!-- MODAL OVERLAY -->
+        <div id="addStaffModal" class="fixed inset-0 bg-black/50 flex items-center justify-center hidden">
 
-        
+            <!-- MODAL CONTAINER -->
+            <div class="bg-white w-full max-w-lg p-6 rounded-xl shadow-lg">
 
+                <!-- HEADER -->
+                <div class="flex justify-between items-center mb-4">
+                    <h2 class="text-xl font-semibold">Ajouter un employé</h2>
+                    <button id="closeModal" class="text-gray-500 hover:text-black text-2xl">&times;</button>
+                </div>
 
+                <!-- FORM -->
+                <form id="staffForm" class="space-y-4 max-h-[80vh] overflow-y-auto">
 
-        <script src="js/script.js"></script>
+                    <label for="">Upload Your Image</label>
+                    <div class="flex items-center justify-center mx-auto w-40 md:w-40 sm:w-50  lg:w-80">
+                        <label for="dropzone-file"
+                            class="flex flex-col items-center justify-center w-full h-64 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50">
+
+                            <!-- Preview Image -->
+                            <img id="preview-image" class="hidden w-full h-full object-cover rounded-lg"
+                                aria-label="photo pic place " />
+
+                            <!-- Upload UI -->
+                            <div id="upload-ui" class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <svg class="w-8 h-8 mb-4 text-gray-500" aria-hidden="true"
+                                    xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
+                                </svg>
+                                <p class="mb-2 text-sm text-gray-500"><span class="font-semibold">Click to
+                                        upload</span> or drag and drop</p>
+                                <p class="text-xs text-gray-500">SVG, PNG, JPG or GIF (MAX. 800x400px)</p>
+                            </div>
+
+                            <input id="dropzone-file" type="file" class="hidden" />
+                            <span id="dropzone-file-error-zone" class="error hidden"></span>
+                        </label>
+                    </div>
+                    <!-- NAME -->
+                    <div>
+                        <label class="block text-sm font-medium">Nom</label>
+                        <input type="text" id="staffName"
+                            class="w-full border rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Ex: Ali Khay">
+                        <span id="staffName-error" class="error hidden"></span>
+                    </div>
+
+                    <!-- ROLE -->
+                    <div>
+                        <label for="countries" class="block mb-2.5 text-sm font-medium text-heading">Select an
+                            option</label>
+                        <select id="staffRole"
+                            class="block w-full w-full border rounded-lg px-3 py-2 px-3 py-2.5 bg-neutral-secondary-medium border border-default-medium text-heading text-sm rounded-base focus:ring-brand focus:border-brand shadow-xs placeholder:text-body">
+                            <option selected>Choose a country</option>
+                            <option value="US">United States</option>
+                            <option value="CA">Canada</option>
+                            <option value="FR">France</option>
+                            <option value="DE">Germany</option>
+                        </select>
+                        <span id="staffRole-error" class="error hidden"></span>
+                    </div>
+
+                    <!-- EMAIL -->
+                    <div>
+                        <label class="block text-sm font-medium">Email</label>
+                        <input type="email" id="staffEmail"
+                            class="w-full border rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="exemple@gmail.com">
+                        <span id="staffEmail-error" class="error hidden"></span>
+                    </div>
+
+                    <!-- PHONE -->
+                    <div>
+                        <label class="block text-sm font-medium">Téléphone</label>
+                        <input type="text" id="staffPhone"
+                            class="w-full border rounded-lg px-3 py-2 mt-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="+2126XXXXXXXX">
+                        <span id="staffPhone-error" class="error hidden"></span>
+                    </div>
+
+                    <!-- EXPERIENCES DYNAMIQUES -->
+                    <div class="flex justify-center flex-col align-middle">
+                        <label class="block text-sm font-medium mb-2">Expériences professionnelles</label>
+
+                        <div id="experienceContainer" class="space-y-2">
+                            <!-- Generated by JS -->
+                        </div>
+
+                        <button type="button" id="Ajouter_Exp"
+                            class="mt-2 px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 m-auto">
+                            + Ajouter une expérience
+                        </button>
+                    </div>
+
+                    <!-- BUTTONS -->
+                    <div class="flex justify-end gap-3 mt-6">
+                        <button type="submit" id="ajouter_employe"
+                            class="px-4 m-auto py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 ">
+                            Ajouter l employé
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+    </div>
+    <script src="js/script.js" type="module"></script>
 </body>
 
 </html>

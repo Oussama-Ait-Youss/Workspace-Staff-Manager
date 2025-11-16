@@ -1,55 +1,48 @@
 .parent {
-    display: grid;
     grid-template-columns: repeat(12, 1fr);
     grid-template-rows: repeat(8, 1fr);
     grid-column-gap: 0px;
     grid-row-gap: 0px;
+    gap: 1;
+}
+.parent div{
+    border: 1px solid black;
+    margin: 1px;
 }
 
 .div1 {
     grid-area: 1 / 1 / 4 / 5;
-    background-color: red;
-    border: 1px solid black;
 }
 
 .div2 {
     grid-area: 4 / 1 / 9 / 5;
-    background-color: yellow;
-    border: 1px solid black;
 }
 
 .div3 {
     grid-area: 1 / 7 / 4 / 10;
-    background-color: green;
-    border: 1px solid black;
 }
 
 .div4 {
     grid-area: 6 / 10 / 9 / 13;
-    background-color: blue;
-    border: 1px solid black;
 }
 
 .div5 {
     grid-area: 6 / 7 / 9 / 10;
-    background-color: purple;
-    border: 1px solid black;
 }
 
 .div6 {
     grid-area: 1 / 10 / 4 / 13;
-    background-color: aqua;
-    border: 1px solid black;
 }
 
 .div7 {
     grid-area: 4 / 7 / 6 / 13;
-    background-color: gray;
-    border: 1px solid black;
+     background: url('../assets/seamless-pattern-thin-diagonal-lines-600nw-2483769999.webp');
 }
 
 .div8 {
     grid-area: 1 / 5 / 9 / 7;
-    background-color: gray;
-    border: 1px solid black;
+     background: url('../assets/seamless-pattern-thin-diagonal-lines-600nw-2483769999.webp');
+}
+.error{
+    color: red;
 }

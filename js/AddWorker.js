@@ -16,11 +16,13 @@ export function AddWorker() {
     // Get values from form
     const staffName = document.getElementById('staffName').value;
     const staffRole = document.getElementById('staffRole').value;
+    const staffEmail = document.getElementById('staffEmail').value
+    const staffPhone = document.getElementById('staffPhone').value
     const fileInput = document.getElementById('dropzone-file');
     const previewImage = document.getElementById('preview-image');
     const uploadUi = document.getElementById('upload-ui');
-    const staffEmail = document.getElementById('staffEmail').value
-    const staffPhone = document.getElementById('staffPhone').value
+
+
 
     // Collect experiences
     const expForms = document.querySelectorAll('.exp-form');
@@ -36,9 +38,9 @@ export function AddWorker() {
             experiences.push({ title, company, description, years });
         }
     });
-
-
-
+    // const fileInput = document.getElementById('dropzone-file');
+    // const previewImage = document.getElementById('preview-image');
+    // const uploadUi = document.getElementById('upload-ui');
     fileInput.addEventListener('change', function () {
         const file = this.files[0];
 
@@ -46,7 +48,7 @@ export function AddWorker() {
             const reader = new FileReader();
 
             reader.onload = function (e) {
-                previewImage.src = e.target.result;   // Show image
+                previewImage.src = e.target.result;   // 
                 previewImage.classList.remove('hidden');
                 uploadUi.classList.add('hidden');     // Hide upload UI
             };
@@ -55,12 +57,16 @@ export function AddWorker() {
         }
     });
 
+
+
+
+
     // Handle photo - use preview image or default
     let image_src;
-    if (previewImage.src && previewImage.src !== window.location.href) {
+    if (previewImage.src) {
         image_src = previewImage.src;
     } else {
-        image_src = 'assets/defualt_pic.jpg'; // Note: typo in "default"
+        image_src = 'assets/defualt_pic.jpg';
     }
     counter++;
     // Create staff object
@@ -73,7 +79,6 @@ export function AddWorker() {
         photo: image_src,
         experiences
     };
-    console.log(staff)
 
     // Create new li element
     const li = document.createElement('li');
@@ -101,23 +106,9 @@ export function AddWorker() {
     // Append li to ul
     staffList.appendChild(li);
 
+    let staffList_data = JSON.parse(localStorage.getItem("staff")) || [];
 
-
-
-
-
-
-    // 3. Save updated list
-    // 1. Get existing list or empty array
-    let staffList_data = JSON.parse(localStorage.getItem("staffList")) || [];
-
-    // 2. Add new staff
     staffList_data.push(staff);
-
-    // 3. Save updated list
-    localStorage.setItem("staffList", JSON.stringify(staffList_data));
-
-    
     savelocalstorage(staffList_data);
     // display the modal of the worker
     // li.addEventListener("click", () => openStaffModal(staff));

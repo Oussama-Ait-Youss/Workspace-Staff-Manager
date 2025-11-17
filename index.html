@@ -176,8 +176,8 @@
                 </form>
             </div>
         </div>
-        <!-- worker modal  -->
-        <div id="staffInfoModal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+        <!-- worker modal -->
+        <div id="staffInfoModal" class="fixed inset-0 bg-black/50 flex items-center justify-center  hidden">
             <div class="bg-white w-full max-w-md p-6 rounded-lg shadow-lg">
 
                 <h2 class="text-xl font-bold mb-4">Staff Information</h2>
@@ -186,13 +186,14 @@
                     <!-- Filled by JS -->
                 </div>
 
-                <button onclick="closeStaffModal()"
+                <button id="info_modal_btn_close"
                     class="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
                     Close
                 </button>
 
             </div>
         </div>
+
 
     </div>
     <script src="js/script.js" type="module"></script>

@@ -1,6 +1,7 @@
 import { validateForm } from './Form-validation.js';
 import { Exp_FormData } from './Experience-Form.js';
 import { AddWorker } from './AddWorker.js';
+import { savelocalstorage } from './savalocalstorage.js';
 
 
 
@@ -12,9 +13,6 @@ const plan = document.querySelector('.plan');
 const staffForm = document.getElementById('staffForm');
 const staffList = document.getElementById('staff_list');
 const addStaffModal = document.getElementById('addStaffModal');
-const fileInput = document.getElementById('dropzone-file');
-const previewImage = document.getElementById('preview-image');
-const uploadUi = document.getElementById('upload-ui');
 const Ajouter_Exp = document.getElementById('Ajouter_Exp');
 
 
@@ -43,39 +41,13 @@ modal.addEventListener("click", (e) => {
 
 
 
-
-
-
-fileInput.addEventListener('change', function () {
-    const file = this.files[0];
-
-    if (file) {
-        const reader = new FileReader();
-
-        reader.onload = function (e) {
-            previewImage.src = e.target.result;   // Show image
-            previewImage.classList.remove('hidden');
-            uploadUi.classList.add('hidden');     // Hide upload UI
-        };
-
-        reader.readAsDataURL(file);
-    }
-});
-
-
-
-
-
-
 // add dynamic form experience
 document.getElementById('Ajouter_Exp').addEventListener('click', function () {
     Exp_FormData();
 });
 
 
-
-
-
+// validate form and add worker 
 staffForm.addEventListener('submit', function (e) {
     e.preventDefault();
 

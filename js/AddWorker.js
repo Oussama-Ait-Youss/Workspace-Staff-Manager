@@ -1,4 +1,15 @@
+// import { openStaffModal } from './openStaffModal';
+import { savelocalstorage } from './savalocalstorage.js';
+
+
+
+let counter = 0;
 export function AddWorker() {
+
+
+
+
+
     const staffForm = document.getElementById('staffForm');
     const staffList = document.getElementById('staff_list');
     const addStaffModal = document.getElementById('addStaffModal');
@@ -8,6 +19,41 @@ export function AddWorker() {
     const fileInput = document.getElementById('dropzone-file');
     const previewImage = document.getElementById('preview-image');
     const uploadUi = document.getElementById('upload-ui');
+    const staffEmail = document.getElementById('staffEmail').value
+    const staffPhone = document.getElementById('staffPhone').value
+
+    // Collect experiences
+    const expForms = document.querySelectorAll('.exp-form');
+    let experiences = [];
+
+    expForms.forEach(exp => {
+        const title = exp.querySelector('.exp-title')?.value.trim();
+        const company = exp.querySelector('.exp-company')?.value.trim();
+        const description = exp.querySelector('.exp-description')?.value.trim();
+        const years = exp.querySelector('.exp-year')?.value.trim();
+
+        if (title || years) {
+            experiences.push({ title, company, description, years });
+        }
+    });
+
+
+
+    fileInput.addEventListener('change', function () {
+        const file = this.files[0];
+
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                previewImage.src = e.target.result;   // Show image
+                previewImage.classList.remove('hidden');
+                uploadUi.classList.add('hidden');     // Hide upload UI
+            };
+
+            reader.readAsDataURL(file);
+        }
+    });
 
     // Handle photo - use preview image or default
     let image_src;
@@ -16,31 +62,65 @@ export function AddWorker() {
     } else {
         image_src = 'assets/defualt_pic.jpg'; // Note: typo in "default"
     }
-
+    counter++;
     // Create staff object
     const staff = {
+        id: counter,
         name: staffName,
         role: staffRole,
-        photo: image_src
+        email: staffEmail,
+        phone: staffPhone,
+        photo: image_src,
+        experiences
     };
+    console.log(staff)
 
     // Create new li element
     const li = document.createElement('li');
-    li.classList.add('flex', 'items-center', 'justify-between', 'p-3', 'mb-3', 'bg-gray-100', 'rounded-lg', 'shadow');
+    li.classList.add(
+        'flex', 'items-center', 'justify-between', 'p-3', 'mb-3',
+        'bg-gray-100', 'rounded-lg', 'shadow',
+        'transi'// 
+    );
+    li.dataset.id = counter;
+
+
+
 
     li.innerHTML = `
-        <div class="flex items-center space-x-3">
-            <img src="${staff.photo}" class="w-12 h-12 rounded-full" alt="${staff.name}">
-            <div>
-                <h3 class="text-lg font-semibold">${staff.name}</h3>
-                <p class="text-sm text-gray-600">${staff.role}</p>
-            </div>
-        </div>
-        <button class="px-3 py-1 bg-blue-600 text-white text-sm rounded">Edit</button>
+    <div class="flex items-center space-x-3">
+    <img src="${staff.photo}" class="w-12 h-12 rounded-full" alt="${staff.name}">
+    <div>
+    <h3 class="text-lg font-semibold">${staff.name}</h3>
+    <p class="text-sm text-gray-600">${staff.role}</p>
+    </div>
+    </div>
+    <button class="px-3 py-1 bg-blue-600 text-white text-sm rounded">Edit</button>
     `;
 
     // Append li to ul
     staffList.appendChild(li);
+
+
+
+
+
+
+
+    // 3. Save updated list
+    // 1. Get existing list or empty array
+    let staffList_data = JSON.parse(localStorage.getItem("staffList")) || [];
+
+    // 2. Add new staff
+    staffList_data.push(staff);
+
+    // 3. Save updated list
+    localStorage.setItem("staffList", JSON.stringify(staffList_data));
+
+    
+    savelocalstorage(staffList_data);
+    // display the modal of the worker
+    // li.addEventListener("click", () => openStaffModal(staff));
 
     // Reset form and close modal
     staffForm.reset();

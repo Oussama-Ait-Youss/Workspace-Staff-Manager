@@ -7,7 +7,7 @@
 }
 .parent div{
     border: 1px solid black;
-    margin: 1px;
+    padding: 10px;
 }
 
 .div1 {
@@ -45,4 +45,34 @@
 }
 .error{
     color: red;
+}
+
+/* button style */
+/* From Uiverse.io by adamgiebl */ 
+.add_btn {
+  color: #090909;
+  font-size: 18px;
+  border-radius: 0.5em;
+  background: #b1d2e3;
+  cursor: pointer;
+  border: 1px solid #e8e8e8;
+  transition: all 0.3s;
+  box-shadow: 6px 6px 12px #c5c5c5, -6px -6px 12px #ffffff;
+}
+
+.add_btn:hover {
+  border: 1px solid white;
+}
+
+.add_btn:active {
+  box-shadow: 4px 4px 12px #c5c5c5, -4px -4px 12px #ffffff;
+}
+
+
+.transi{
+    transition: all 0.3s ease;
+}
+.transi:hover{
+    transform: scale(1.02);
+    box-shadow: 1px 1px 10px #090909;
 }

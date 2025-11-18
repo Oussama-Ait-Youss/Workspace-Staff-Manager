@@ -1,15 +1,18 @@
 const validationRules = {
     'staffName': {
-        regex: /^[A-Za-z\s]{2,}$/, // Fixed: allows letters and spaces, minimum 2 chars
-        message: "Invalid name (minimum 2 letters)"
+        // Allows letters, spaces, hyphens, and apostrophes (for complex names), minimum 2 characters
+        regex: /^[A-Za-z\s'-]{2,}$/, 
+        message: "Nom invalide (min. 2 lettres, pas de chiffres/symboles)"
     },
     'staffPhone': {
-        regex: /^0[67]\d{8}$/, // Fixed: matches 06/07 followed by 8 digits
-        message: "Phone number must be 10 digits starting with 06 or 07"
+        // Matches 10 digits starting with 06 or 07 (Moroccan format)
+        regex: /^0[67]\d{8}$/, 
+        message: "Le numéro doit commencer par 06 ou 07 et contenir 10 chiffres"
     },
     'staffEmail': {
+        // Standard email regex
         regex: /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
-        message: "Invalid email format"
+        message: "Format d'email invalide"
     }
 };
 
@@ -33,6 +36,13 @@ function toggleError(field, show, message = '') {
 }
 
 function validateField(field, value) {
+    // Check if the field is empty (required check)
+    if (!value.trim()) {
+        toggleError(field, true, 'Ce champ est obligatoire.');
+        return false;
+    }
+    
+    // Check against specific regex rule
     if (validationRules[field] && !validationRules[field].regex.test(value)) {
         toggleError(field, true, validationRules[field].message);
         return false;
@@ -45,7 +55,6 @@ function validateField(field, value) {
 function validateFile() {
     const fileInput = document.getElementById('dropzone-file');
     const dropzoneFileError = document.getElementById('dropzone-file-error-zone');
-    const fileName = fileInput.value;
     
     // Clear previous error
     dropzoneFileError.textContent = '';
@@ -55,17 +64,20 @@ function validateFile() {
 
     // Check if file is selected
     if (!fileInput.files || fileInput.files.length === 0) {
-        dropzoneFileError.textContent = "Please add your photo";
+        dropzoneFileError.textContent = "Veuillez ajouter votre photo.";
         dropzoneFileError.classList.remove('hidden');
         isValid = false;
     } else {
+        const fileName = fileInput.value;
+        // Corrected: Profile pictures should be standard image formats. Removed 'pdf'.
+        const allowedTypes = ['jpg', 'jpeg', 'png', 'gif']; 
+        
         // Get file extension
         const fileExtension = fileName.substring(fileName.lastIndexOf('.') + 1).toLowerCase();
-        const allowedTypes = ['jpg', 'jpeg', 'png', 'pdf'];
         
         // Check file type
         if (!allowedTypes.includes(fileExtension)) {
-            dropzoneFileError.textContent = "Only types are accepted: jpg, jpeg, png, pdf";
+            dropzoneFileError.textContent = "Seuls les types d'images (jpg, jpeg, png, gif) sont acceptés.";
             dropzoneFileError.classList.remove('hidden');
             isValid = false;
         }
@@ -74,7 +86,7 @@ function validateFile() {
         const file = fileInput.files[0];
         const maxSize = 5 * 1024 * 1024; // 5MB in bytes
         if (file && file.size > maxSize) {
-            dropzoneFileError.textContent = "File size too large. Maximum size is 5MB";
+            dropzoneFileError.textContent = "La taille du fichier est trop grande. Maximum: 5MB";
             dropzoneFileError.classList.remove('hidden');
             isValid = false;
         }
@@ -89,25 +101,21 @@ function validateForm() {
     const staffName = document.getElementById('staffName');
     const staffEmail = document.getElementById('staffEmail');
     const staffPhone = document.getElementById('staffPhone');
+    
+    // Clear role error (as role is a <select> and always has a value selected)
+    toggleError('staffRole', false); 
 
-    // Validate each field
-    if (!validateField(staffName.id, staffName.value)) {
-        isValid = false;
-    }
+    // Validate fields. Using && here ensures we don't skip validation, 
+    // but we correctly accumulate the overall result in 'isValid'.
+    // If isValid is already false, we keep it false.
+    isValid = validateField(staffName.id, staffName.value) && isValid;
+    isValid = validateField(staffEmail.id, staffEmail.value) && isValid;
+    isValid = validateField(staffPhone.id, staffPhone.value) && isValid;
 
-    if (!validateField(staffEmail.id, staffEmail.value)) {
-        isValid = false;
-    }
+    // Corrected: Crucially, include validateFile result in the main validation result
+    isValid = validateFile() && isValid;
 
-    if (!validateField(staffPhone.id, staffPhone.value)) {
-        isValid = false;
-    }
-
-    // Validate file
-    if (!validateFile()) {
-    }
-
-    return isValid; // Return true only if all validations pass
+    return isValid; // Returns true only if all validations passed
 }
 
 export { validateForm, validateField, toggleError, validateFile };

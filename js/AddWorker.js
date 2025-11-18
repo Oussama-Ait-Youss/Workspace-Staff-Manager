@@ -1,27 +1,26 @@
-// import { openStaffModal } from './openStaffModal';
 import { savelocalstorage } from './savalocalstorage.js';
 
+// Initialize the counter based on existing staff length or 0.
+// This ensures IDs are somewhat persistent across sessions.
+// For robust ID generation, you might find the maximum existing ID, but
+// using the length as an offset is a simple way to prevent immediate overlaps.
+let counter = JSON.parse(localStorage.getItem("staff"))?.length || 0; 
 
 
-let counter = 0;
 export function AddWorker() {
-
-
-
-
-
+    // DOM elements
     const staffForm = document.getElementById('staffForm');
     const staffList = document.getElementById('staff_list');
     const addStaffModal = document.getElementById('addStaffModal');
+    
     // Get values from form
     const staffName = document.getElementById('staffName').value;
     const staffRole = document.getElementById('staffRole').value;
     const staffEmail = document.getElementById('staffEmail').value
     const staffPhone = document.getElementById('staffPhone').value
-    const fileInput = document.getElementById('dropzone-file');
+    // fileInput is not needed here as we use the previewImage source
     const previewImage = document.getElementById('preview-image');
     const uploadUi = document.getElementById('upload-ui');
-
 
 
     // Collect experiences
@@ -34,41 +33,24 @@ export function AddWorker() {
         const description = exp.querySelector('.exp-description')?.value.trim();
         const years = exp.querySelector('.exp-year')?.value.trim();
 
+        // Only add experience if title or years is provided
         if (title || years) {
             experiences.push({ title, company, description, years });
         }
     });
-    // const fileInput = document.getElementById('dropzone-file');
-    // const previewImage = document.getElementById('preview-image');
-    // const uploadUi = document.getElementById('upload-ui');
-    fileInput.addEventListener('change', function () {
-        const file = this.files[0];
+    
+    // *** REMOVED MISPLACED fileInput.addEventListener('change', ...) ***
+    // This event listener logic must live in script.js and run only once.
 
-        if (file) {
-            const reader = new FileReader();
+    // Handle photo - use preview image source (base64 data) or default.
+    // Check if the preview image actually holds the file data.
+    let image_src = previewImage.src && previewImage.src.includes('data:image') 
+        ? previewImage.src 
+        : 'assets/defualt_pic.png';
 
-            reader.onload = function (e) {
-                previewImage.src = e.target.result;   // 
-                previewImage.classList.remove('hidden');
-                uploadUi.classList.add('hidden');     // Hide upload UI
-            };
-
-            reader.readAsDataURL(file);
-        }
-    });
-
-
-
-
-
-    // Handle photo - use preview image or default
-    let image_src;
-    if (previewImage.src) {
-        image_src = previewImage.src;
-    } else {
-        image_src = 'assets/defualt_pic.jpg';
-    }
+    // Increment counter for the new staff ID
     counter++;
+    
     // Create staff object
     const staff = {
         id: counter,
@@ -85,13 +67,12 @@ export function AddWorker() {
     li.classList.add(
         'flex', 'items-center', 'justify-between', 'p-3', 'mb-3',
         'bg-gray-100', 'rounded-lg', 'shadow',
-        'transi'// 
+        'transi'
     );
     li.dataset.id = counter;
 
 
-
-
+    // Create the HTML for the new staff member list item
     li.innerHTML = `
     <div class="flex items-center space-x-3">
     <img src="${staff.photo}" class="w-12 h-12 rounded-full" alt="${staff.name}">
@@ -106,12 +87,12 @@ export function AddWorker() {
     // Append li to ul
     staffList.appendChild(li);
 
+    // Update Local Storage
     let staffList_data = JSON.parse(localStorage.getItem("staff")) || [];
-
     staffList_data.push(staff);
     savelocalstorage(staffList_data);
-    // display the modal of the worker
-    // li.addEventListener("click", () => openStaffModal(staff));
+    
+    // Note: The logic to display the modal of the worker (openStaffModal) is commented out/missing.
 
     // Reset form and close modal
     staffForm.reset();
@@ -120,6 +101,9 @@ export function AddWorker() {
     previewImage.classList.add('hidden');
     uploadUi.classList.remove('hidden');
     previewImage.src = '';
+    
+    // Clear all dynamically added experience forms (keep only one blank one, or none)
+    document.getElementById('experienceContainer').innerHTML = '';
 
     // Close modal
     addStaffModal.classList.add('hidden');

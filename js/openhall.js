@@ -32,8 +32,9 @@ export function openHallStaffModal(hallName) {
         if (staffRole === 'security-guy' && targetHall === 'security') {
             return true;
         }
-
         // CONFERENCE staff only goes to Conference (assuming the hall name is "Conference")
+        // CONFERENCE staff only goes to Conference (assuming the hall name is "Conference")
+        
         if (staffRole === 'conference' && targetHall === 'conference') {
             return true;
         }

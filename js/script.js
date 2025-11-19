@@ -1,19 +1,22 @@
 import { validateForm } from './Form-validation.js';
 import { Exp_FormData } from './Experience-Form.js';
 import { AddWorker } from './AddWorker.js';
-import {openHallStaffModal} from './openhall.js'
-// import { savelocalstorage } from './savalocalstorage.js'; // Not needed if used only in AddWorker
+import { openHallStaffModal } from './openhall.js'
+import { savelocalstorage } from './savalocalstorage.js'; // Not needed if used only in AddWorker
+import { loadStaff } from './loadStaff.js';
+
 
 // Select elements
-const btnAdd = document.getElementById("add_staff");   
-const modal = document.getElementById("addStaffModal"); 
-const closeModal = document.getElementById("closeModal"); 
+const btnAdd = document.getElementById("add_staff");
+const modal = document.getElementById("addStaffModal");
+const closeModal = document.getElementById("closeModal");
 const staffForm = document.getElementById('staffForm');
 const staffList = document.getElementById('staff_list');
 const Ajouter_Exp = document.getElementById('Ajouter_Exp');
 const staffInfoModal = document.getElementById('staffInfoModal');
 const infoModalCloseBtn = document.getElementById('info_modal_btn_close');
 const addWorkerToHallModal = document.getElementById('add_worker_to_hall_modal');
+const closeFooterBtn = document.getElementById('info_modal_btn_close_footer');
 
 // Image Upload Elements
 const fileInput = document.getElementById('dropzone-file');
@@ -32,40 +35,10 @@ function closeStaffModal() {
 window.closeStaffModal = closeStaffModal;
 
 
-/**
- * Function to load staff data from local storage and render the list.
- */
-function loadStaff() {
-    const data = JSON.parse(localStorage.getItem('staff')) || [];
-    staffList.innerHTML = ''; // Clear existing list
-
-    data.forEach(staff => {
-        const li = document.createElement('li');
-        li.classList.add(
-            'flex', 'items-center', 'justify-between', 'p-3', 'mb-3',
-            'bg-gray-100', 'rounded-lg', 'shadow',
-            'transi'
-        );
-        li.dataset.id = staff.id;
-
-        li.innerHTML = `
-        <div class="flex items-center space-x-3">
-            <img src="${staff.photo}" class="w-12 h-12 rounded-full" alt="${staff.name}">
-            <div>
-                <h3 class="text-lg font-semibold">${staff.name}</h3>
-                <p class="text-sm text-gray-600">${staff.role}</p>
-            </div>
-        </div>
-        <button class="px-3 py-1 bg-blue-600 text-white text-sm rounded">Edit</button>
-        `;
-        staffList.appendChild(li);
-    });
-}
-
 // --- EVENT LISTENERS ---
 
 // 1. Load data on page load
-window.addEventListener('load', loadStaff);
+window.addEventListener('load', loadStaff());
 
 // 2. Open Add Staff modal
 btnAdd.addEventListener("click", () => {
@@ -102,21 +75,21 @@ fileInput.addEventListener('change', function () {
     if (file) {
         const reader = new FileReader();
         reader.onload = function (e) {
-            previewImage.src = e.target.result;   
+            previewImage.src = e.target.result;
             previewImage.classList.remove('hidden');
-            uploadUi.classList.add('hidden');     
+            uploadUi.classList.add('hidden');
         };
         reader.readAsDataURL(file);
     }
 });
 
-// 6. Add dynamic experience form
+// 6. addeventlistener  when you Add dynamic experience form
 Ajouter_Exp.addEventListener('click', function () {
     Exp_FormData();
 });
 
 
-// 7. Validate form and add worker 
+// 7. addeventlistener when you Validate form and add worker 
 staffForm.addEventListener('submit', function (e) {
     e.preventDefault();
 
@@ -124,26 +97,26 @@ staffForm.addEventListener('submit', function (e) {
         console.log('Form validation failed');
         return; // Stop if validation fails
     }
-    
+
     // Add the worker and save to local storage
     AddWorker();
-    
+
     // After adding, reload the list to show the new item, 
     // especially if we need updated functionality (like editing)
-    loadStaff(); 
+    loadStaff();
 });
 
 
-// 8. Show worker info using Event Delegation on staff_list
+// 8. addevent listener when you click to Show worker info using staff_list
 staffList.addEventListener('click', (e) => {
     // Traverse up to find the closest LI, which holds the worker ID
     const listItem = e.target.closest('li[data-id]');
-    
+
     // Check if the click was on the list item (not the edit button)
-    if (listItem && !e.target.closest('button')) { 
+    if (listItem && !e.target.closest('button')) {
         const worker_id = Number(listItem.dataset.id);
         const modalContent = document.getElementById('modalContent');
-        
+
         const localStorage_data = localStorage.getItem('staff');
         const data = JSON.parse(localStorage_data) || [];
 
@@ -179,8 +152,14 @@ staffList.addEventListener('click', (e) => {
             `;
         }
     }
-    // TODO: Add logic here to handle the "Edit" button click.
+    function closeModal() {
+        staffInfoModal.classList.add('hidden');
+    }
+    
+    // Attach event listeners to the close buttons
+    closeFooterBtn.addEventListener('click', closeModal);
 });
+
 
 
 // 9. Open 'Add Staff to Hall' modal
@@ -188,24 +167,24 @@ const add_staff_to_hall = document.getElementById('add_staff_to_hall');
 
 add_staff_to_hall.addEventListener('click', () => {
     const modalStaffList = document.getElementById('modalStaffList');
-    
+
     // Get staff data from Local Storage (ensures modal is up-to-date)
     const staffData = JSON.parse(localStorage.getItem('staff')) || [];
 
     // Clear previous content
     modalStaffList.innerHTML = '';
-    
+
     if (staffData.length === 0) {
         modalStaffList.innerHTML = '<p class="text-gray-500 p-4 text-center">Aucun personnel disponible à sélectionner.</p>';
     } else {
         const ul = document.createElement('ul');
         ul.classList.add('space-y-2');
-        
+
         staffData.forEach(staff => {
             const item = document.createElement('li');
             item.dataset.id = staff.id;
             item.classList.add(
-                'flex', 'items-center', 'justify-between', 'p-2', 'bg-gray-50', 'rounded', 
+                'flex', 'items-center', 'justify-between', 'p-2', 'bg-gray-50', 'rounded',
                 'hover:bg-blue-50', 'cursor-pointer', 'border', 'border-transparent'
             );
 
@@ -219,7 +198,7 @@ add_staff_to_hall.addEventListener('click', () => {
                 </div>
                 <div class="selection-indicator w-3 h-3 bg-gray-300 rounded-full ml-2 transition-colors"></div>
             `;
-            
+
             // Add click event to select/deselect staff
             item.addEventListener('click', function () {
                 this.classList.toggle('bg-blue-100');
@@ -232,6 +211,6 @@ add_staff_to_hall.addEventListener('click', () => {
         });
         modalStaffList.appendChild(ul);
     }
-    
+
     addWorkerToHallModal.classList.remove('hidden');
 });

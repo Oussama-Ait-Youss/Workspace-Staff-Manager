@@ -28,7 +28,7 @@ function getStaffById(id) {
  * applying custom assignment rules.
  */
 export function openHallStaffModal(hallName) {
-    
+
     const addWorkerToHallModal = document.getElementById('add_worker_to_hall_modal');
     const modalStaffList = document.getElementById('modalStaffList');
 
@@ -155,6 +155,7 @@ hallLayout.addEventListener('click', (e) => {
 
         // Find the <p> element within that div to get the room/hall name
         const hallNameElement = parentDiv.querySelector('p');
+        const hallcapacity = parentDiv.querySelector('#capacity_nbr')
 
         if (hallNameElement) {
             const hallName = hallNameElement.textContent.trim();
@@ -186,7 +187,7 @@ function removeStaffFromHall(staffId, cardElement) {
  */
 function assignStaffToHall(staff, hallName) {
     const addWorkerToHallModal = document.getElementById('add_worker_to_hall_modal');
-    
+
     // 1. Find the target room div
     const hallLayoutDivs = document.querySelectorAll('#parent > div');
     let targetDiv = null;
@@ -215,11 +216,25 @@ function assignStaffToHall(staff, hallName) {
 
     // 3. Append the staff card to the target hall div
     const addButton = targetDiv.querySelector('.add_btn');
-    
+
     // Use insertAdjacentHTML to inject the card and keep a reference to it
     const tempWrapper = document.createElement('div');
     tempWrapper.innerHTML = staffCardHTML.trim();
     const newStaffCard = tempWrapper.firstChild;
+    let capacity = 0
+    if (targetDiv.querySelector('span').textContent !== 0) {
+        if (targetDiv.querySelector('p').textContent !== 'Conference' || targetDiv.querySelector('p').textContent !== 'Personnal') {
+
+            targetDiv.classList.remove('bg-red-600')
+        }
+    }
+
+
+    // make the maximum number of persone in room 2.
+    if (Number(targetDiv.querySelector('span').textContent) >= 2) {
+        alert('you reach the maximum number of worker in the room...')
+        return;
+    }
 
     if (addButton) {
         // Insert the card before the button
@@ -228,21 +243,32 @@ function assignStaffToHall(staff, hallName) {
         // Fallback: append to the end of the div
         targetDiv.appendChild(newStaffCard);
     }
+    capacity = Number(targetDiv.querySelector('span').textContent) + 1
+    targetDiv.querySelector('span').textContent = capacity
 
     // 4. *** FIX: Attach the event listener to the newly created 'Remove' button ***
     const removeButton = newStaffCard.querySelector('.remove-staff-btn');
     removeButton.addEventListener('click', () => {
         // Call the helper function to handle removal from DOM and (if applicable) storage
         removeStaffFromHall(staff.id, newStaffCard);
+        capacity = Number(targetDiv.querySelector('span').textContent) - 1
+        targetDiv.querySelector('span').textContent = capacity
+        if (capacity === 0) {
+            // Use AND (&&) to ensure BOTH conditions must be met for the block to run
+            if (targetDiv.querySelector('p').textContent !== 'Conference' && targetDiv.querySelector('p').textContent !== 'Personnal') {
+
+                targetDiv.classList.add('bg-red-600');
+            }
+        }
     });
     // **************************************************************************
 
 
     // 5. Hide the modal
     addWorkerToHallModal.classList.add('hidden');
-    
+
     // Optional: Reset the global variable
     currentTargetHall = null;
-    
+
     // Note: If you are tracking assignments in localStorage, you must update that state here or in removeStaffFromHall.
 }

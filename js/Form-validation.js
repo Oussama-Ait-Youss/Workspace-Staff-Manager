@@ -91,8 +91,7 @@ function validateFile() {
             isValid = false;
         }
     }
-    
-    return isValid;
+    return isValid
 }
 
 function validateForm() {
@@ -111,9 +110,10 @@ function validateForm() {
     isValid = validateField(staffName.id, staffName.value) && isValid;
     isValid = validateField(staffEmail.id, staffEmail.value) && isValid;
     isValid = validateField(staffPhone.id, staffPhone.value) && isValid;
+    // isValid = validateField(staffPhone.id, staffPhone.value) && isValid;
 
     // Corrected: Crucially, include validateFile result in the main validation result
-    isValid = validateFile() && isValid;
+    // isValid = validateFile() && isValid;
 
     return isValid; // Returns true only if all validations passed
 }

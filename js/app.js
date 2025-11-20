@@ -221,67 +221,76 @@ const viewModalButton = document.getElementById('view_modal');
 const sallesModal = document.getElementById('modal_of_salles_in_mobile');
 const sallesContentContainer = document.getElementById('salles_content_container');
 const closeSallesModalButton = document.getElementById('close_salles_modal');
+const parent = document.getElementById('parent');
 
-// 2. Define the HTML content to be injected (The hall/room grid)
-// Note: We MUST remove the 'hidden md:grid' classes from the parent div 
-// so it is visible inside the mobile modal.
-const sallesHTML = `
-    <div class="parent w-full h-full grid grid-cols-2 gap-3 p-2 bg-gray-100">
+
+
+// i remove the part of display salle when you click view button
+// const shallowClone = parent.cloneNode(true);
+
+
+
+
+// // 2. Define the HTML content to be injected (The hall/room grid)
+// // Note: We MUST remove the 'hidden md:grid' classes from the parent div 
+// // so it is visible inside the mobile modal.
+// const sallesHTML = `
+//     <div class="parent w-full h-full grid grid-cols-2 gap-3 p-2 bg-gray-100">
         
-        <div class="div1 flex flex-col items-center justify-center bg-white rounded-lg p-3 shadow-md">
-            <p class="text-lg font-semibold text-center text-blue-800">Conference</p>
-            <button id="add_staff_to_hall"
-                class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/2 mt-2">+</button>
-        </div>
+//         <div class="div1 flex flex-col items-center justify-center bg-white rounded-lg p-3 shadow-md">
+//             <p class="text-lg font-semibold text-center text-blue-800">Conference</p>
+//             <button id="add_staff_to_hall"
+//                 class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/2 mt-2">+</button>
+//         </div>
 
-        <div class="div2 flex flex-col items-center justify-center bg-white rounded-lg p-3 shadow-md">
-            <p class="text-lg font-semibold text-center">Security</p>
-            <button
-                class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/2 mt-2">+</button>
-        </div>
+//         <div class="div2 flex flex-col items-center justify-center bg-white rounded-lg p-3 shadow-md">
+//             <p class="text-lg font-semibold text-center">Security</p>
+//             <button
+//                 class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/2 mt-2">+</button>
+//         </div>
 
-        <div class="div3 flex flex-col items-center justify-center bg-white rounded-lg p-3 shadow-md">
-            <p class="text-lg font-semibold text-center">Serveur</p>
-            <button
-                class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/2 mt-2">+</button>
-        </div>
+//         <div class="div3 flex flex-col items-center justify-center bg-white rounded-lg p-3 shadow-md">
+//             <p class="text-lg font-semibold text-center">Serveur</p>
+//             <button
+//                 class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/2 mt-2">+</button>
+//         </div>
 
-        <div class="div4 flex flex-col items-center justify-center bg-white rounded-lg p-3 shadow-md">
-            <p class="text-lg font-semibold text-center">Personnal</p>
-            <button
-                class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/2 mt-2">+</button>
-        </div>
+//         <div class="div4 flex flex-col items-center justify-center bg-white rounded-lg p-3 shadow-md">
+//             <p class="text-lg font-semibold text-center">Personnal</p>
+//             <button
+//                 class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/2 mt-2">+</button>
+//         </div>
 
-        <div class="div5 flex flex-col items-center justify-center bg-white rounded-lg p-3 shadow-md">
-            <p class="text-lg font-semibold text-center">Archives</p>
-            <button
-                class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/2 mt-2">+</button>
-        </div>
+//         <div class="div5 flex flex-col items-center justify-center bg-white rounded-lg p-3 shadow-md">
+//             <p class="text-lg font-semibold text-center">Archives</p>
+//             <button
+//                 class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/2 mt-2">+</button>
+//         </div>
 
-        <div class="div6 flex flex-col items-center justify-center bg-white rounded-lg p-3 shadow-md">
-            <p class="text-lg font-semibold text-center">Reception</p>
-            <button
-                class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/2 mt-2">+</button>
-        </div>
+//         <div class="div6 flex flex-col items-center justify-center bg-white rounded-lg p-3 shadow-md">
+//             <p class="text-lg font-semibold text-center">Reception</p>
+//             <button
+//                 class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/2 mt-2">+</button>
+//         </div>
         
-        <div class="div7 bg-white rounded-lg shadow-inner"></div>
-        <div class="div8 bg-white rounded-lg shadow-inner"></div>
-    </div>
-`;
+//         <div class="div7 bg-white rounded-lg shadow-inner"></div>
+//         <div class="div8 bg-white rounded-lg shadow-inner"></div>
+//     </div>
+// `;
 
 
-// 3. Click event listener to open the modal
-viewModalButton.addEventListener('click', (e) => {
-    // Inject the HTML content
-    e.preventDefault();
+// // 3. Click event listener to open the modal
+// viewModalButton.addEventListener('click', (e) => {
+//     // Inject the HTML content
+//     e.preventDefault();
 
-    console.log("button is clicked")
-    sallesContentContainer.innerHTML = sallesHTML;
-    sallesModal.classList.remove('hidden');
+//     console.log("button is clicked")
+//     sallesContentContainer.innerHTML = sallesHTML;
+//     sallesModal.classList.remove('hidden');
 
-    // Display the modal
+//     // Display the modal
     
-});
+// });
 
 // 4. Click event listener to close the modal
 closeSallesModalButton.addEventListener('click', () => {

@@ -11,9 +11,11 @@ export function loadStaff() {
         li.classList.add(
             'flex', 'items-center', 'justify-between', 'p-3', 'mb-3',
             'bg-gray-100', 'rounded-lg', 'shadow',
-            'transi'
         );
         li.dataset.id = staff.id;
+        // li.classList.add('cards');
+
+        // li.setAttribute('draggable',true);
 
         // --- MODIFIED: Added Delete Button and button container ---
         li.innerHTML = `
@@ -37,7 +39,45 @@ export function loadStaff() {
         const deleteButton = li.querySelector('.delete-btn');
         deleteButton.addEventListener('click', () => {
             // Use the shared deleteWorker function
-            deleteWorker(staff.id, li);
+
+            // add the modal of sweet alert 
+            const swalWithBootstrapButtons = Swal.mixin({
+                customClass: {
+                    confirmButton: "btn btn-success",
+                    cancelButton: "btn btn-danger"
+                },
+                buttonsStyling: false
+            });
+            swalWithBootstrapButtons.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonText: "Yes, delete it!",
+                cancelButtonText: "No, cancel!",
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    deleteWorker(staff.id, li);
+                    swalWithBootstrapButtons.fire({
+                        title: "Deleted!",
+                        text: "worker  has been deleted.",
+                        icon: "success"
+                    });
+                } else if (
+                    /* Read more about handling dismissals below */
+                    result.dismiss === Swal.DismissReason.cancel
+                ) {
+                    swalWithBootstrapButtons.fire({
+                        title: "Cancelled",
+                        text: "Your imaginary file is safe :)",
+                        icon: "error"
+                    });
+                }
+
+                
+                // add the modal of sweet alert 
+            });
         });
         // --------------------------------------------------------
     });
@@ -53,5 +93,5 @@ function deleteWorker(staffId, listItem) {
     const updatedList = staffList_data.filter(staff => staff.id !== staffId);
 
     // Assuming savelocalstorage is available
-    localStorage.setItem('staff',JSON.stringify(updatedList))
+    localStorage.setItem('staff', JSON.stringify(updatedList))
 }

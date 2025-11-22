@@ -67,7 +67,6 @@ export function AddWorker() {
     li.classList.add(
         'flex', 'items-center', 'justify-between', 'p-3', 'mb-3',
         'bg-gray-100', 'rounded-lg', 'shadow',
-        'transi'
     );
     li.dataset.id = counter;
 

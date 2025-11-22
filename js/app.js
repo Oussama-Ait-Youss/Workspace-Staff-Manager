@@ -34,7 +34,13 @@ function closeStaffModal() {
 // Make the function available globally (needed because of the inline onclick in index.html)
 window.closeStaffModal = closeStaffModal;
 
-
+document.addEventListener('DOMContentLoaded', (event) => {
+    dragstart()
+    dragend()
+    dragover()
+    dragleave()
+    drop()
+})
 // --- EVENT LISTENERS ---
 
 // 1. Load data on page load
@@ -236,7 +242,7 @@ const parent = document.getElementById('parent');
 // // so it is visible inside the mobile modal.
 // const sallesHTML = `
 //     <div class="parent w-full h-full grid grid-cols-2 gap-3 p-2 bg-gray-100">
-        
+
 //         <div class="div1 flex flex-col items-center justify-center bg-white rounded-lg p-3 shadow-md">
 //             <p class="text-lg font-semibold text-center text-blue-800">Conference</p>
 //             <button id="add_staff_to_hall"
@@ -272,7 +278,7 @@ const parent = document.getElementById('parent');
 //             <button
 //                 class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/2 mt-2">+</button>
 //         </div>
-        
+
 //         <div class="div7 bg-white rounded-lg shadow-inner"></div>
 //         <div class="div8 bg-white rounded-lg shadow-inner"></div>
 //     </div>
@@ -289,10 +295,64 @@ const parent = document.getElementById('parent');
 //     sallesModal.classList.remove('hidden');
 
 //     // Display the modal
-    
+
 // });
 
 // 4. Click event listener to close the modal
 closeSallesModalButton.addEventListener('click', () => {
     sallesModal.classList.add('hidden');
 });
+
+
+
+
+// drag and drop
+
+// let drag = null;
+
+
+// const parentdiv = document.querySelectorAll('.div1','.div2','.div3','.div4','.div5','.div6')
+// const staff_list = document.querySelectorAll('.cards')
+
+
+// function dragstart() {
+//     staff_list.forEach(item => {
+//         item.addEventListener("dragstart", () => {
+//             item.style.backgroundColor = "red"
+//             drag = item
+//         })
+//     })
+// }
+
+// function dragend() {
+//     staff_list.forEach(item => {
+//         item.addEventListener("dragend", () => {
+//             item.style.backgroundColor = "black"
+//             drag = null
+//         })
+//     })
+// }
+
+// function dragover() {
+//     parentdiv.forEach(box => {
+//         box.addEventListener("dragover", (e) => {
+//             e.preventDefault()
+//             box.style.backgroundColor = "gray";
+//         })
+//     })
+// }
+// function dragleave() {
+//     parentdiv.forEach(box => {
+//         box.addEventListener("dragleave", () => {
+//             box.style.backgroundColor = "white";
+//         })
+//     })
+// }
+
+// function drop() {
+//     parentdiv.forEach(box => {
+//         box.addEventListener("drop", () => {
+//             box.appendChild(drag);
+//         })
+//     })
+// }

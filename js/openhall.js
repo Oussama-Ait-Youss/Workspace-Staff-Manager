@@ -1,21 +1,6 @@
 // 1. Define the global variable for the current hall target
 let currentTargetHall = null;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // A utility function to retrieve the full staff object by ID (needed for assignment logic)
 function getStaffById(id) {
     const allStaff = JSON.parse(localStorage.getItem('staff')) || [];
@@ -25,7 +10,7 @@ function getStaffById(id) {
 // ----------------------------------------------------------------------
 /**
  * Opens the staff selection modal and filters staff based on the clicked room/hall name, 
- * applying custom assignment rules.
+ * applying custom assignment rules AND checking if they are already assigned.
  */
 export function openHallStaffModal(hallName) {
 
@@ -41,23 +26,38 @@ export function openHallStaffModal(hallName) {
     // Normalize Hall Name for comparison
     const targetHall = hallName.toLowerCase();
 
-    // 2. Custom Filtering Logic based on Rules
+    // ============================================================
+    // ✅ NEW FIX: Get list of IDs already inside ANY Hall
+    // ============================================================
+    // We look for every card currently displayed in a room to ensure we don't clone Alex
+    const assignedCards = document.querySelectorAll('.assigned-staff-card');
+    // Create an array of IDs (converted to Numbers to match staff.id)
+    const assignedStaffIds = Array.from(assignedCards).map(card => Number(card.dataset.staffId));
+    // ============================================================
+
+    // 2. Custom Filtering Logic based on Rules + Availability
     const filteredStaff = allStaff.filter(staff => {
+        
+        // --- CHECK 1: IS ALREADY ASSIGNED? ---
+        if (assignedStaffIds.includes(staff.id)) {
+            return false; // Don't show them if they are already in a room
+        }
+
         const staffRole = staff.role.toLowerCase();
 
-        // --- Strict, Exclusive Assignments ---
+        // --- CHECK 2: Strict, Exclusive Assignments ---
 
         // RECEPTIONNISTE only goes to Reception
         if (staffRole === 'receptionniste' && targetHall === 'reception') {
             return true;
         }
 
-        // IT TECH only goes to Salle des Serveurs (assuming the hall name for Server Room is "Serveur")
+        // IT TECH only goes to Salle des Serveurs
         if (staffRole === 'it tech' && targetHall === 'serveur') {
             return true;
         }
 
-        // Security-Guy only goes to Salle de Sécurité (assuming the hall name is "Security")
+        // Security-Guy only goes to Salle de Sécurité
         if (staffRole === 'security-guy' && targetHall === 'security') {
             return true;
         }
@@ -77,7 +77,7 @@ export function openHallStaffModal(hallName) {
             return true;
         }
 
-        // If none of the specific rules are met, the staff member is not eligible for this room.
+        // If none of the specific rules are met
         return false;
     });
 
@@ -90,7 +90,7 @@ export function openHallStaffModal(hallName) {
 
     // 5. Generate List Content
     if (filteredStaff.length === 0) {
-        modalStaffList.innerHTML = `<p class="text-gray-500 p-4 text-center">Aucun personnel éligible trouvé pour ${hallName}.</p>`;
+        modalStaffList.innerHTML = `<p class="text-gray-500 p-4 text-center">Aucun personnel éligible (ou disponible) trouvé pour ${hallName}.</p>`;
     } else {
         const ul = document.createElement('ul');
         ul.classList.add('space-y-2');
@@ -115,20 +115,18 @@ export function openHallStaffModal(hallName) {
                 <button class="select-staff-btn bg-green-500 text-white text-xs px-2 py-1 rounded hover:bg-green-600" data-staff-id="${staff.id}">Sélectionner</button>
             `;
 
-            // --- FIX: Add event listener for the selection button ---
+            // Add event listener for the selection button
             const selectButton = item.querySelector('.select-staff-btn');
             selectButton.addEventListener('click', (e) => {
                 const staffId = parseInt(selectButton.dataset.staffId);
-                const selectedStaff = getStaffById(staffId); // Retrieve the full staff object
+                const selectedStaff = getStaffById(staffId); 
 
                 if (selectedStaff) {
-                    // Call the assignment function with the full staff object and the current hall name
                     assignStaffToHall(selectedStaff, hallName);
                 } else {
                     console.error('Staff member not found for ID:', staffId);
                 }
             });
-            // ----------------------------------------------------
 
             ul.appendChild(item);
         });
@@ -146,40 +144,27 @@ const hallLayout = document.querySelector('.parent');
 
 // Attach the listener using event delegation to handle clicks on all '+' buttons
 hallLayout.addEventListener('click', (e) => {
-    // Check if the clicked element or its closest ancestor is one of the room buttons
     const roomButton = e.target.closest('.add_btn');
 
     if (roomButton) {
-        // Find the parent div of the button (div1, div2, etc.)
         const parentDiv = roomButton.parentElement;
-
-        // Find the <p> element within that div to get the room/hall name
         const hallNameElement = parentDiv.querySelector('p');
-        const hallcapacity = parentDiv.querySelector('#capacity_nbr')
 
         if (hallNameElement) {
             const hallName = hallNameElement.textContent.trim();
-            // Call the function to open the modal with filtered staff
             openHallStaffModal(hallName);
         }
     }
 });
 
 // ----------------------------------------------------------------------
+
 /**
- * Takes a staff object and the target hall name, updates the DOM, 
- * and closes the selection modal.
+ * Helper function to handle DOM removal from hall
  */
-// A helper function to handle the removal logic
 function removeStaffFromHall(staffId, cardElement) {
-    // 1. Remove the staff card element from the DOM
     cardElement.remove();
-
-    // 2. OPTIONAL: Update Local Storage / Assignment state here
-    // If you are tracking assignments in localStorage, you must update that data here.
-    console.log(`Removed staff ID ${staffId}. Remember to update your assignment state in localStorage!`);
 }
-
 
 /**
  * Takes a staff object and the target hall name, updates the DOM, 
@@ -204,6 +189,12 @@ function assignStaffToHall(staff, hallName) {
         return;
     }
 
+    // Capacity Check
+    if (Number(targetDiv.querySelector('span').textContent) >= 2) {
+        alert('You reach the maximum number of worker in the room...');
+        return;
+    }
+
     // 2. Create the staff card HTML for the hall view
     const staffCardHTML = `
         <div data-staff-id="${staff.id}" class="assigned-staff-card flex flex-col items-center bg-white p-2 rounded-lg shadow-md border-t-4 border-blue-500 mt-2">
@@ -216,59 +207,143 @@ function assignStaffToHall(staff, hallName) {
 
     // 3. Append the staff card to the target hall div
     const addButton = targetDiv.querySelector('.add_btn');
-
-    // Use insertAdjacentHTML to inject the card and keep a reference to it
     const tempWrapper = document.createElement('div');
     tempWrapper.innerHTML = staffCardHTML.trim();
     const newStaffCard = tempWrapper.firstChild;
-    let capacity = 0
+
+    // Visual Updates
     if (targetDiv.querySelector('span').textContent !== 0) {
-        if (targetDiv.querySelector('p').textContent !== 'Conference' || targetDiv.querySelector('p').textContent !== 'Personnal') {
-
-            targetDiv.classList.remove('bg-red-600')
+        if (targetDiv.querySelector('p').textContent !== 'Conference' && targetDiv.querySelector('p').textContent !== 'Personnal') {
+            targetDiv.classList.remove('bg-red-600');
         }
-    }
-
-
-    // make the maximum number of persone in room 2.
-    if (Number(targetDiv.querySelector('span').textContent) >= 2) {
-        alert('you reach the maximum number of worker in the room...')
-        return;
     }
 
     if (addButton) {
-        // Insert the card before the button
         addButton.insertAdjacentElement('beforebegin', newStaffCard);
     } else {
-        // Fallback: append to the end of the div
         targetDiv.appendChild(newStaffCard);
     }
-    capacity = Number(targetDiv.querySelector('span').textContent) + 1
-    targetDiv.querySelector('span').textContent = capacity
 
-    // 4. *** FIX: Attach the event listener to the newly created 'Remove' button ***
+    // Update Capacity
+    let capacity = Number(targetDiv.querySelector('span').textContent) + 1;
+    targetDiv.querySelector('span').textContent = capacity;
+
+    // ============================================================
+    // REMOVE FROM SIDEBAR
+    // ============================================================
+    const sidebarItem = document.getElementById(`sidebar-staff-${staff.id}`) 
+                     || document.querySelector(`#staff_list [data-id="${staff.id}"]`);
+
+    if (sidebarItem) {
+        sidebarItem.remove();
+    } else {
+        console.warn("Could not find sidebar item to remove.");
+    }
+
+    // 4. Attach event listener to the newly created 'Remove' button
     const removeButton = newStaffCard.querySelector('.remove-staff-btn');
     removeButton.addEventListener('click', () => {
-        // Call the helper function to handle removal from DOM and (if applicable) storage
+        
         removeStaffFromHall(staff.id, newStaffCard);
-        capacity = Number(targetDiv.querySelector('span').textContent) - 1
-        targetDiv.querySelector('span').textContent = capacity
-        if (capacity === 0) {
-            // Use AND (&&) to ensure BOTH conditions must be met for the block to run
-            if (targetDiv.querySelector('p').textContent !== 'Conference' && targetDiv.querySelector('p').textContent !== 'Personnal') {
+        
+        // Update capacity
+        capacity = Number(targetDiv.querySelector('span').textContent) - 1;
+        targetDiv.querySelector('span').textContent = capacity;
 
+        if (capacity === 0) {
+            if (targetDiv.querySelector('p').textContent !== 'Conference' && targetDiv.querySelector('p').textContent !== 'Personnal') {
                 targetDiv.classList.add('bg-red-600');
             }
         }
+        
+        // Return to sidebar
+        restoreStaffToSidebar(staff);
     });
-    // **************************************************************************
-
 
     // 5. Hide the modal
     addWorkerToHallModal.classList.add('hidden');
-
-    // Optional: Reset the global variable
     currentTargetHall = null;
+}
 
-    // Note: If you are tracking assignments in localStorage, you must update that state here or in removeStaffFromHall.
+/**
+ * Re-creates the staff card and appends it back to the main sidebar list.
+ * Re-attaches Edit and Delete listeners correctly.
+ */
+function restoreStaffToSidebar(staff) {
+    const staffList = document.getElementById('staff_list');
+
+    // Create the list item
+    const li = document.createElement('li');
+    li.id = `sidebar-staff-${staff.id}`;
+    li.dataset.id = staff.id;
+    li.classList.add('bg-gray-50', 'p-3', 'rounded-lg', 'shadow-sm', 'flex', 'items-center', 'justify-between', 'border', 'border-gray-200');
+
+    li.innerHTML = `
+       <div class="flex items-center space-x-3">
+            <img src="${staff.photo}" class="w-12 h-12 rounded-full object-cover" alt="${staff.name}" onerror="this.onerror=null; this.src='assets/defualt_pic.png';">
+            <div>
+                <h3 class="text-lg font-semibold">${staff.name}</h3>
+                <p class="text-sm text-gray-600">${staff.role}</p>
+            </div>
+        </div>
+        <div class="flex space-x-2">
+            <button class="edit-btn px-3 py-1 bg-blue-600 text-white text-sm rounded hover:bg-blue-700">Edit</button>
+            <button class="delete-btn px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700">Delete</button>
+        </div>
+    `;
+
+    // Re-attach DELETE functionality
+    const deleteBtn = li.querySelector('.delete-btn');
+    deleteBtn.addEventListener('click', () => {
+        const swalWithBootstrapButtons = Swal.mixin({
+            customClass: {
+                confirmButton: "btn btn-success",
+                cancelButton: "btn btn-danger"
+            },
+            buttonsStyling: false
+        });
+
+        swalWithBootstrapButtons.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "No, cancel!",
+            reverseButtons: true
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // ✅ FIX: Only delete from LocalStorage AFTER confirmation
+                let allStaff = JSON.parse(localStorage.getItem('staff')) || [];
+                allStaff = allStaff.filter(s => s.id !== staff.id);
+                localStorage.setItem('staff', JSON.stringify(allStaff));
+
+                // Remove from DOM
+                li.remove();
+
+                swalWithBootstrapButtons.fire({
+                    title: "Deleted!",
+                    text: "Worker has been deleted.",
+                    icon: "success"
+                });
+            } else if (result.dismiss === Swal.DismissReason.cancel) {
+                swalWithBootstrapButtons.fire({
+                    title: "Cancelled",
+                    text: "The worker is safe :)",
+                    icon: "error"
+                });
+            }
+        });
+    });
+
+    // Re-attach EDIT functionality (placeholder)
+    const editBtn = li.querySelector('.edit-btn');
+    if(editBtn) {
+        editBtn.addEventListener('click', () => {
+             // If you have an edit function, call it here.
+             console.log('Edit clicked for', staff.name);
+        });
+    }
+
+    staffList.appendChild(li);
 }

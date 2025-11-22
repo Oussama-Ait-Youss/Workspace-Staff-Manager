@@ -1,358 +1,204 @@
-import { validateForm } from './Form-validation.js';
+import * as Data from './data.js';
+import * as UI from './ui.js';
+import * as HallManager from './hallManager.js';
+import { validateForm, validateFile } from './Form-validation.js';
 import { Exp_FormData } from './Experience-Form.js';
-import { AddWorker } from './AddWorker.js';
-import { openHallStaffModal } from './openhall.js'
-import { savelocalstorage } from './savalocalstorage.js';
-import { loadStaff } from './loadStaff.js';
 
+// DOM Elements
+const els = {
+    staffList: document.getElementById('staff_list'),
+    btnAdd: document.getElementById('add_staff'),
+    addModal: document.getElementById('addStaffModal'),
+    closeModal: document.getElementById('closeModal'),
+    form: document.getElementById('staffForm'),
+    fileInput: document.getElementById('dropzone-file'),
+    previewImg: document.getElementById('preview-image'),
+    uploadUi: document.getElementById('upload-ui'),
+    addExpBtn: document.getElementById('Ajouter_Exp'),
+    
+    // Hall Modal Elements
+    hallModal: document.getElementById('add_worker_to_hall_modal'),
+    hallStaffList: document.getElementById('modalStaffList'),
+    
+    // Info Modal
+    infoModal: document.getElementById('staffInfoModal'),
+    infoContent: document.getElementById('modalContent'),
+    closeInfoBtn: document.getElementById('info_modal_btn_close'),
+    closeInfoFooter: document.getElementById('info_modal_btn_close_footer')
+};
 
-// Select elements
-const btnAdd = document.getElementById("add_staff");
-const modal = document.getElementById("addStaffModal");
-const closeModal = document.getElementById("closeModal");
-const staffForm = document.getElementById('staffForm');
-const staffList = document.getElementById('staff_list');
-const Ajouter_Exp = document.getElementById('Ajouter_Exp');
-const staffInfoModal = document.getElementById('staffInfoModal');
-const infoModalCloseBtn = document.getElementById('info_modal_btn_close');
-const addWorkerToHallModal = document.getElementById('add_worker_to_hall_modal');
-const closeFooterBtn = document.getElementById('info_modal_btn_close_footer');
+// --- 1. Initialization ---
+document.addEventListener('DOMContentLoaded', () => {
+    renderSidebar();
+});
 
-// Image Upload Elements
-const fileInput = document.getElementById('dropzone-file');
-const previewImage = document.getElementById('preview-image');
-const uploadUi = document.getElementById('upload-ui');
+// Function to render the entire sidebar list
+export function renderSidebar() {
+    const staffData = Data.getStaffData();
+    const assignedIds = Array.from(document.querySelectorAll('.assigned-staff-card'))
+                             .map(el => Number(el.dataset.staffId));
 
-// --- INITIAL SETUP AND UTILITY FUNCTIONS ---
+    els.staffList.innerHTML = '';
 
-/**
- * Global function to close the staff assignment modal (used by HTML inline click)
- */
-function closeStaffModal() {
-    addWorkerToHallModal.classList.add('hidden');
+    staffData.forEach(staff => {
+        // Only render if NOT currently in a room
+        if (!assignedIds.includes(staff.id)) {
+            const card = UI.createSidebarCard(staff);
+            els.staffList.appendChild(card);
+
+            // Attach Delete Listener
+            card.querySelector('.delete-btn').addEventListener('click', (e) => {
+                e.stopPropagation(); // Stop modal from opening
+                handleDelete(staff.id);
+            });
+        }
+    });
 }
-// Make the function available globally (needed because of the inline onclick in index.html)
-window.closeStaffModal = closeStaffModal;
 
-document.addEventListener('DOMContentLoaded', (event) => {
-    dragstart()
-    dragend()
-    dragover()
-    dragleave()
-    drop()
-})
-// --- EVENT LISTENERS ---
-
-// 1. Load data on page load
-window.addEventListener('load', loadStaff());
-
-// 2. Open Add Staff modal
-btnAdd.addEventListener("click", () => {
-    modal.classList.remove("hidden");
+// Listen for "Restoration" from HallManager
+document.addEventListener('restoreStaff', () => {
+    renderSidebar();
 });
 
-// 3. Close Add Staff modal
-closeModal.addEventListener("click", () => {
-    modal.classList.add("hidden");
-});
 
-// Close when clicking outside the Add Staff modal content
-modal.addEventListener("click", (e) => {
-    if (e.target === modal) {
-        modal.classList.add("hidden");
-    }
-});
+// --- 2. Form Handling (Add Staff) ---
+els.btnAdd.addEventListener('click', () => els.addModal.classList.remove('hidden'));
+els.closeModal.addEventListener('click', () => els.addModal.classList.add('hidden'));
+els.addExpBtn.addEventListener('click', Exp_FormData);
 
-// 4. Close Worker Info modal
-infoModalCloseBtn.addEventListener("click", () => {
-    staffInfoModal.classList.add("hidden");
-});
-// Close when clicking outside the Info modal content
-staffInfoModal.addEventListener("click", (e) => {
-    if (e.target === staffInfoModal) {
-        staffInfoModal.classList.add("hidden");
-    }
-});
-
-// 5. Image Preview Listener (Runs once)
-fileInput.addEventListener('change', function () {
+els.fileInput.addEventListener('change', function() {
     const file = this.files[0];
-
     if (file) {
         const reader = new FileReader();
-        reader.onload = function (e) {
-            previewImage.src = e.target.result;
-            previewImage.classList.remove('hidden');
-            uploadUi.classList.add('hidden');
+        reader.onload = (e) => {
+            els.previewImg.src = e.target.result;
+            els.previewImg.classList.remove('hidden');
+            els.uploadUi.classList.add('hidden');
         };
         reader.readAsDataURL(file);
     }
 });
 
-// 6. addeventlistener  when you Add dynamic experience form
-Ajouter_Exp.addEventListener('click', function () {
-    Exp_FormData();
-});
-
-
-// 7. addeventlistener when you Validate form and add worker 
-staffForm.addEventListener('submit', function (e) {
+els.form.addEventListener('submit', (e) => {
     e.preventDefault();
+    if (!validateForm()) return;
 
-    if (!validateForm()) {
-        console.log('Form validation failed');
-        return; // Stop if validation fails
-    }
+    // Collect Experiences
+    const experiences = [];
+    document.querySelectorAll('.exp-form').forEach(exp => {
+        experiences.push({
+            title: exp.querySelector('.exp-title').value,
+            company: exp.querySelector('.exp-company').value,
+            years: exp.querySelector('.exp-year').value,
+            description: exp.querySelector('.exp-description').value
+        });
+    });
 
-    // Add the worker and save to local storage
-    AddWorker();
+    const newStaff = {
+        id: Data.generateId(),
+        name: document.getElementById('staffName').value,
+        role: document.getElementById('staffRole').value,
+        email: document.getElementById('staffEmail').value,
+        phone: document.getElementById('staffPhone').value,
+        photo: els.previewImg.src.includes('data:image') ? els.previewImg.src : 'assets/defualt_pic.png',
+        experiences: experiences
+    };
 
-    // After adding, reload the list to show the new item, 
-    // especially if we need updated functionality (like editing)
-    loadStaff();
+    Data.addStaffToData(newStaff);
+    renderSidebar();
+    
+    // Reset & Close
+    els.form.reset();
+    els.previewImg.src = '';
+    els.previewImg.classList.add('hidden');
+    els.uploadUi.classList.remove('hidden');
+    document.getElementById('experienceContainer').innerHTML = '';
+    els.addModal.classList.add('hidden');
+    
+    Swal.fire("Success", "Employé ajouté avec succès", "success");
 });
 
 
-// 8. addevent listener when you click to Show worker info using staff_list
-staffList.addEventListener('click', (e) => {
-    // Traverse up to find the closest LI, which holds the worker ID
-    const listItem = e.target.closest('li[data-id]');
+// --- 3. Delete Logic ---
+function handleDelete(id) {
+    Swal.fire({
+        title: "Êtes-vous sûr?",
+        text: "Cette action est irréversible!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        confirmButtonText: "Oui, supprimer!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            Data.deleteStaffFromData(id);
+            renderSidebar();
+            Swal.fire("Supprimé!", "L'employé a été supprimé.", "success");
+        }
+    });
+}
 
-    // Check if the click was on the list item (not the edit button)
-    if (listItem && !e.target.closest('button')) {
-        const worker_id = Number(listItem.dataset.id);
-        const modalContent = document.getElementById('modalContent');
 
-        const localStorage_data = localStorage.getItem('staff');
-        const data = JSON.parse(localStorage_data) || [];
-
-        // Find the specific staff member
-        const staff = data.find(s => s.id === worker_id);
-
+// --- 4. Info Modal Logic ---
+els.staffList.addEventListener('click', (e) => {
+    const card = e.target.closest('li');
+    if (card && !e.target.classList.contains('delete-btn')) {
+        const staff = Data.getStaffById(card.dataset.id);
         if (staff) {
-            staffInfoModal.classList.remove('hidden');
-            modalContent.innerHTML = `
-                <div class="flex items-center  space-x-3 mb-4">
-                    <img src="${staff.photo}" class="w-12 h-12 rounded-full border" alt="${staff.name} photo" />
-                    <div>
-                        <p class="text-lg font-semibold">${staff.name}</p>
-                        <p class="text-sm text-gray-600">${staff.role}</p>
-                    </div>
-                </div>
-
-                <p><strong>Email:</strong> ${staff.email}</p>
-                <p><strong>Téléphone:</strong> ${staff.phone}</p>
-
-                <h3 class="text-lg font-semibold mt-4 mb-2">Expériences:</h3>
-                ${staff.experiences && staff.experiences.length > 0 ? `
-                    <ul class="space-y-2">
-                        ${staff.experiences.map(exp => `
-                            <li class="p-2 bg-gray-100 rounded">
-                                <strong>${exp.title || 'N/A'}</strong> – ${exp.company || 'N/A'}<br>
-                                <em>${exp.years || 'N/A'}</em><br>
-                                <p>${exp.description || ''}</p>
-                            </li>
-                        `).join('')}
-                    </ul>
-                ` : `<p class="text-gray-500">Aucune expérience ajoutée.</p>`}
-            `;
+            els.infoContent.innerHTML = UI.createInfoModalContent(staff);
+            els.infoModal.classList.remove('hidden');
         }
     }
-    function closeModal() {
-        staffInfoModal.classList.add('hidden');
-    }
-
-    // Attach event listeners to the close buttons
-    closeFooterBtn.addEventListener('click', closeModal);
 });
 
+const closeInfo = () => els.infoModal.classList.add('hidden');
+els.closeInfoBtn.addEventListener('click', closeInfo);
+els.closeInfoFooter.addEventListener('click', closeInfo);
 
 
-// 9. Open 'Add Staff to Hall' modal
-const add_staff_to_hall = document.getElementById('add_staff_to_hall');
+// --- 5. Room Assignment Logic ---
+// Global Close for HTML inline calls (if any remain)
+window.closeStaffModal = () => els.hallModal.classList.add('hidden');
 
-add_staff_to_hall.addEventListener('click', (e) => {
-    e.preventDefault();
-    const modalStaffList = document.getElementById('modalStaffList');
+// Delegate click on Room "+" buttons
+document.querySelector('#parent').addEventListener('click', (e) => {
+    if (e.target.classList.contains('add_btn')) {
+        const roomName = e.target.parentElement.querySelector('p').textContent.trim();
+        openAssignmentModal(roomName);
+    }
+});
 
-    // Get staff data from Local Storage (ensures modal is up-to-date)
-    const staffData = JSON.parse(localStorage.getItem('staff')) || [];
+function openAssignmentModal(roomName) {
+    const staffAvailable = HallManager.getEligibleStaff(roomName);
+    
+    els.hallStaffList.innerHTML = '';
+    document.querySelector('#add_worker_to_hall_modal h2').textContent = `Ajouter à: ${roomName}`;
 
-    // Clear previous content
-    modalStaffList.innerHTML = '';
-
-    if (staffData.length === 0) {
-        modalStaffList.innerHTML = '<p class="text-gray-500 p-4 text-center">Aucun personnel disponible à sélectionner.</p>';
+    if (staffAvailable.length === 0) {
+        els.hallStaffList.innerHTML = `<p class="text-center p-4 text-gray-500">Personne n'est disponible pour ce poste.</p>`;
     } else {
         const ul = document.createElement('ul');
-        ul.classList.add('space-y-2');
-
-        staffData.forEach(staff => {
-            const item = document.createElement('li');
-            item.dataset.id = staff.id;
-            // item.classList.add(
-            //     'flex', 'items-center', 'justify-between', 'p-2', 'bg-gray-50', 'rounded',
-            //     'hover:bg-blue-50', 'cursor-pointer', 'border', 'border-transparent'
-            // );
-
-            item.innerHTML = `
-                    <img src="${staff.photo}" class="w-8 h-8 rounded-full" alt="${staff.name}">
-                    <div>
-                        <p class="text-md font-medium">${staff.name}</p>
-                        <p class="text-sm text-gray-500">${staff.role}</p>
-                    </div>
+        ul.className = "space-y-2";
+        
+        staffAvailable.forEach(staff => {
+            const li = document.createElement('li');
+            li.className = "flex justify-between items-center p-2 bg-gray-50 rounded border hover:bg-blue-50 cursor-pointer";
+            li.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <img src="${staff.photo}" class="w-8 h-8 rounded-full">
+                    <span>${staff.name} <small class="text-gray-500">(${staff.role})</small></span>
+                </div>
+                <button class="bg-green-500 text-white px-2 py-1 rounded text-xs">Choisir</button>
             `;
-
-            // Add click event to select/deselect staff
-            item.addEventListener('click', function () {
-                this.classList.toggle('bg-blue-100');
-                this.classList.toggle('border-blue-300');
-                const indicator = this.querySelector('.selection-indicator');
-                indicator.classList.toggle('bg-green-500');
-                indicator.classList.toggle('bg-gray-300');
+            
+            li.addEventListener('click', () => {
+                HallManager.assignStaffToRoom(staff.id, roomName);
+                els.hallModal.classList.add('hidden');
             });
-            ul.appendChild(item);
+            
+            ul.appendChild(li);
         });
-        modalStaffList.appendChild(ul);
+        els.hallStaffList.appendChild(ul);
     }
-
-    addWorkerToHallModal.classList.remove('hidden');
-});
-
-
-// addeventlistener to view button 
-//###########################################
-// 1. Get references to the elements
-const viewModalButton = document.getElementById('view_modal');
-const sallesModal = document.getElementById('modal_of_salles_in_mobile');
-const sallesContentContainer = document.getElementById('salles_content_container');
-const closeSallesModalButton = document.getElementById('close_salles_modal');
-const parent = document.getElementById('parent');
-
-
-
-// i remove the part of display salle when you click view button
-// const shallowClone = parent.cloneNode(true);
-
-
-
-
-// // 2. Define the HTML content to be injected (The hall/room grid)
-// // Note: We MUST remove the 'hidden md:grid' classes from the parent div 
-// // so it is visible inside the mobile modal.
-// const sallesHTML = `
-//     <div class="parent w-full h-full grid grid-cols-2 gap-3 p-2 bg-gray-100">
-
-//         <div class="div1 flex flex-col items-center justify-center bg-white rounded-lg p-3 shadow-md">
-//             <p class="text-lg font-semibold text-center text-blue-800">Conference</p>
-//             <button id="add_staff_to_hall"
-//                 class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/2 mt-2">+</button>
-//         </div>
-
-//         <div class="div2 flex flex-col items-center justify-center bg-white rounded-lg p-3 shadow-md">
-//             <p class="text-lg font-semibold text-center">Security</p>
-//             <button
-//                 class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/2 mt-2">+</button>
-//         </div>
-
-//         <div class="div3 flex flex-col items-center justify-center bg-white rounded-lg p-3 shadow-md">
-//             <p class="text-lg font-semibold text-center">Serveur</p>
-//             <button
-//                 class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/2 mt-2">+</button>
-//         </div>
-
-//         <div class="div4 flex flex-col items-center justify-center bg-white rounded-lg p-3 shadow-md">
-//             <p class="text-lg font-semibold text-center">Personnal</p>
-//             <button
-//                 class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/2 mt-2">+</button>
-//         </div>
-
-//         <div class="div5 flex flex-col items-center justify-center bg-white rounded-lg p-3 shadow-md">
-//             <p class="text-lg font-semibold text-center">Archives</p>
-//             <button
-//                 class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/2 mt-2">+</button>
-//         </div>
-
-//         <div class="div6 flex flex-col items-center justify-center bg-white rounded-lg p-3 shadow-md">
-//             <p class="text-lg font-semibold text-center">Reception</p>
-//             <button
-//                 class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/2 mt-2">+</button>
-//         </div>
-
-//         <div class="div7 bg-white rounded-lg shadow-inner"></div>
-//         <div class="div8 bg-white rounded-lg shadow-inner"></div>
-//     </div>
-// `;
-
-
-// // 3. Click event listener to open the modal
-// viewModalButton.addEventListener('click', (e) => {
-//     // Inject the HTML content
-//     e.preventDefault();
-
-//     console.log("button is clicked")
-//     sallesContentContainer.innerHTML = sallesHTML;
-//     sallesModal.classList.remove('hidden');
-
-//     // Display the modal
-
-// });
-
-// 4. Click event listener to close the modal
-closeSallesModalButton.addEventListener('click', () => {
-    sallesModal.classList.add('hidden');
-});
-
-
-
-
-// drag and drop
-
-// let drag = null;
-
-
-// const parentdiv = document.querySelectorAll('.div1','.div2','.div3','.div4','.div5','.div6')
-// const staff_list = document.querySelectorAll('.cards')
-
-
-// function dragstart() {
-//     staff_list.forEach(item => {
-//         item.addEventListener("dragstart", () => {
-//             item.style.backgroundColor = "red"
-//             drag = item
-//         })
-//     })
-// }
-
-// function dragend() {
-//     staff_list.forEach(item => {
-//         item.addEventListener("dragend", () => {
-//             item.style.backgroundColor = "black"
-//             drag = null
-//         })
-//     })
-// }
-
-// function dragover() {
-//     parentdiv.forEach(box => {
-//         box.addEventListener("dragover", (e) => {
-//             e.preventDefault()
-//             box.style.backgroundColor = "gray";
-//         })
-//     })
-// }
-// function dragleave() {
-//     parentdiv.forEach(box => {
-//         box.addEventListener("dragleave", () => {
-//             box.style.backgroundColor = "white";
-//         })
-//     })
-// }
-
-// function drop() {
-//     parentdiv.forEach(box => {
-//         box.addEventListener("drop", () => {
-//             box.appendChild(drag);
-//         })
-//     })
-// }
+    
+    els.hallModal.classList.remove('hidden');
+}

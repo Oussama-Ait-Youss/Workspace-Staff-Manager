@@ -10,16 +10,16 @@ function updateRoomCapacity(roomDiv, change) {
     let newCount = current + change;
 
     // Clamp 
-    if (newCount < 0) newCount = 0;
+    if (newCount < 0) {newCount = 0;};
     span.textContent = newCount;
 
     // Visual Feedback (Red if full)
     const roomName = roomDiv.querySelector('p').textContent.trim();
     // Optional: Don't turn certain rooms red if you don't want to
-    if (newCount >= max) {
-        roomDiv.classList.add('bg-red-100', 'border-red-500'); 
+    if (newCount === 0) {
+        roomDiv.classList.add('bg-[#400000]'); 
     } else {
-        roomDiv.classList.remove('bg-red-100', 'border-red-500');
+        roomDiv.classList.remove('bg-[#400000]');
     }
 }
 

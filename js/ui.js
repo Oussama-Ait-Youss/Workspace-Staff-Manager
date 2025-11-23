@@ -5,7 +5,7 @@ export function createSidebarCard(staff) {
     li.dataset.id = staff.id;
     li.classList.add(
         'flex', 'items-center', 'justify-between', 'p-3', 'mb-3',
-        'bg-gray-100', 'rounded-lg', 'shadow', 'border', 'border-gray-200'
+        'bg-[#151d2c]', 'rounded-lg', 'border', 
     );
 
     li.innerHTML = `
@@ -13,12 +13,12 @@ export function createSidebarCard(staff) {
             <img src="${staff.photo}" class="w-12 h-12 rounded-full object-cover" 
                  alt="${staff.name}" onerror="this.src='assets/default_pic.png'">
             <div>
-                <h3 class="text-lg font-semibold">${staff.name}</h3>
-                <p class="text-sm text-gray-600">${staff.role}</p>
+                <h3 class="text-lg text-[#00BCFF] font-semibold">${staff.name}</h3>
+                <p class="text-sm text-white text-gray-600">${staff.role}</p>
             </div>
         </div>
         <div class="flex space-x-2">
-            <button class="delete-btn px-3 py-1 bg-red-600 text-white text-sm rounded hover:bg-red-700">
+            <button class="delete-btn px-3 py-1 bg-[#400000] text-white text-sm rounded">
                 Delete
             </button>
         </div>

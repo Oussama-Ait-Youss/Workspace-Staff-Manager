@@ -18,11 +18,14 @@
 
     <div class="flex flex-col md:flex-row h-screen">
         <!-- side bar -->
-        <div class="w-full md:w-1/3 bg-[#030712] shadow-lg p-4 flex h-full flex-col justify-between">
+        <div class="w-full md:w-1/3 bg-[#030712] shadow-lg p-4 flex h-full flex-col justify-between ">
             <div>
-                <h1 class="text-3xl text-white py-6 font-bold mb-4 ">Staff Manager</h1>
-
-                <ul id="staff_list" class="space-y-3 max-h-[80vh] overflow-y-auto">
+                <h1 class="text-3xl text-white py-6 font-bold mb-4">Staff Manager</h1>
+                <div>
+                    <input type="text" id="search_staff" placeholder="Search a Worker..."
+                        class="mt-1 block w-full px-3 py-2 border text-white p-9 my-6 border-gray-300/30 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
+                </div>
+                <ul id="staff_list" class="space-y-3 max-h-[70vh] overflow-y-auto">
                 </ul>
             </div>
 
@@ -30,46 +33,122 @@
                 + Add Staff
             </button>
         </div>
-
-
         <!-- salles div -->
         <div id="parent" class="parent text-white w-full md:flex-1 flex-col md:grid bg-[#030712]">
-            <div class="div1 flex bg-[#1a2436] rounded-lg flex-col border-1 justify-between m-auto w-full h-full items-center ">
-                <p class="text-center">Conference</p>
-                <p>capacity <span>0</span>/2</p>
-                <button id="add_staff_to_hall"
-                    class="add_btn bg-blue-600  text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/3 ">+</button>
-            </div>
-            <div class="div2 flex bg-[#1a2436] rounded-lg flex-col justify-between border-1 m-auto w-full h-full items-center bg-[#400000]">
-                <p>Security</p>
-                <p>capacity <span>0</span>/2</p>
+            <div
+                class="div1 flex bg-[#1a2436] rounded-lg flex-col border border-white/20 border/1 justify-between m-auto w-full h-full items-center ">
+                <div class="text-center  w-full pb-3 mb-2">
+                    <!-- Room Title -->
+                    <p class="text-lg font-bold text-white tracking-wide">Conference</p>
+
+                    <!-- Capacity Indicator -->
+                    <p class="text-xs text-gray-400 mt-1 font-mono uppercase tracking-wider">
+                        Capacity
+                        <!-- The span ID allows JS to update the number -->
+                        <span id="capacity_nbr" class="text-blue-400 font-bold text-sm ml-1">0</span>
+                        <span class="text-gray-600">/2</span>
+                    </p>
+                </div>
                 <button
-                    class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/3">+</button>
+                    class="add_btn bg-blue-600 hover:bg-blue-500 text-white text-2xl font-bold w-12 h-12 rounded-full shadow-lg transform transition hover:scale-110 flex items-center justify-center mt-3">
+                    +
+                </button>
             </div>
-            <div class="div3 flex bg-[#1a2436] rounded-lg flex-col justify-between border-1 m-auto w-full h-full items-center bg-[#400000]">
-                <p>Serveur</p>
-                <p>capacity <span>0</span>/2</p>
+            <div
+                class="div2 flex bg-[#1a2436] rounded-lg flex-col justify-between border border-white/20 m-auto w-full h-full items-center bg-[#400000]">
+                <div class="text-center  w-full pb-3 mb-2">
+                    <!-- Room Title -->
+                    <p class="text-lg font-bold text-white tracking-wide">Security</p>
+
+                    <!-- Capacity Indicator -->
+                    <p class="text-xs text-gray-400 mt-1 font-mono uppercase tracking-wider">
+                        Capacity
+                        <!-- The span ID allows JS to update the number -->
+                        <span id="capacity_nbr" class="text-blue-400 font-bold text-sm ml-1">0</span>
+                        <span class="text-gray-600">/2</span>
+                    </p>
+                </div>
                 <button
-                    class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/3">+</button>
+                    class="add_btn bg-blue-600 hover:bg-blue-500 text-white text-2xl font-bold w-12 h-12 rounded-full shadow-lg transform transition hover:scale-110 flex items-center justify-center mt-3">
+                    +
+                </button>
             </div>
-            <div class="div4 flex bg-[#1a2436] rounded-lg flex-col justify-between border-1 m-auto w-full h-full items-center ">
-                <p>Personnal</p>
-                <p>capacity <span>0</span>/2</p>
+            <div
+                class="div3 flex bg-[#1a2436] rounded-lg flex-col justify-between border border-white/20 m-auto w-full h-full items-center bg-[#400000]">
+                <div class="text-center  w-full pb-3 mb-2">
+                    <!-- Room Title -->
+                    <p class="text-lg font-bold text-white tracking-wide">Serveur</p>
+
+                    <!-- Capacity Indicator -->
+                    <p class="text-xs text-gray-400 mt-1 font-mono uppercase tracking-wider">
+                        Capacity
+                        <!-- The span ID allows JS to update the number -->
+                        <span id="capacity_nbr" class="text-blue-400 font-bold text-sm ml-1">0</span>
+                        <span class="text-gray-600">/2</span>
+                    </p>
+                </div>
                 <button
-                    class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/3">+</button>
+                    class="add_btn bg-blue-600 hover:bg-blue-500 text-white text-2xl font-bold w-12 h-12 rounded-full shadow-lg transform transition hover:scale-110 flex items-center justify-center mt-3">
+                    +
+                </button>
             </div>
-            <div class="div5 flex bg-[#1a2436] rounded-lg flex-col justify-between border-1 m-auto w-full h-full items-center bg-[#400000]">
-                <p>Archives</p>
-                <p>capacity <span>0</span>/2</p>
+            <div
+                class="div4 flex bg-[#1a2436] rounded-lg flex-col justify-between border border-white/20 m-auto w-full h-full items-center ">
+                <div class="text-center  w-full pb-3 mb-2">
+                    <!-- Room Title -->
+                    <p class="text-lg font-bold text-white tracking-wide">personnel</p>
+
+                    <!-- Capacity Indicator -->
+                    <p class="text-xs text-gray-400 mt-1 font-mono uppercase tracking-wider">
+                        Capacity
+                        <!-- The span ID allows JS to update the number -->
+                        <span id="capacity_nbr" class="text-blue-400 font-bold text-sm ml-1">0</span>
+                        <span class="text-gray-600">/2</span>
+                    </p>
+                </div>
+                <button
+                    class="add_btn bg-blue-600 hover:bg-blue-500 text-white text-2xl font-bold w-12 h-12 rounded-full shadow-lg transform transition hover:scale-110 flex items-center justify-center mt-3">
+                    +
+                </button>
+            </div>
+            <div
+                class="div5 flex bg-[#1a2436] rounded-lg flex-col justify-between border border-white/20 m-auto w-full h-full items-center bg-[#400000]">
+                <div class="text-center  w-full pb-3 mb-2">
+                    <!-- Room Title -->
+                    <p class="text-lg font-bold text-white tracking-wide">Archives</p>
+
+                    <!-- Capacity Indicator -->
+                    <p class="text-xs text-gray-400 mt-1 font-mono uppercase tracking-wider">
+                        Capacity
+                        <!-- The span ID allows JS to update the number -->
+                        <span id="capacity_nbr" class="text-blue-400 font-bold text-sm ml-1">0</span>
+                        <span class="text-gray-600">/2</span>
+                    </p>
+                </div>
 
                 <button
-                    class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/3">+</button>
+                    class="add_btn bg-blue-600 hover:bg-blue-500 text-white text-2xl font-bold w-12 h-12 rounded-full shadow-lg transform transition hover:scale-110 flex items-center justify-center mt-3">
+                    +
+                </button>
             </div>
-            <div class="div6 flex bg-[#1a2436] rounded-lg flex-col justify-between m-auto w-full h-full items-center bg-[#400000]">
-                <p>Reception</p>
-                <p>capacity <span>0</span>/2</p>
+            <div
+                class="div6 flex bg-[#1a2436] rounded-lg border border-white/20 flex-col justify-between m-auto w-full h-full items-center bg-[#400000]">
+                <div class="text-center  w-full pb-3 mb-2">
+                    <!-- Room Title -->
+                    <p class="text-lg font-bold text-white tracking-wide">Reception</p>
+
+                    <!-- Capacity Indicator -->
+                    <p class="text-xs text-gray-400 mt-1 font-mono uppercase tracking-wider">
+                        Capacity
+                        <!-- The span ID allows JS to update the number -->
+                        <span id="capacity_nbr" class="text-blue-400 font-bold text-sm ml-1">0</span>
+                        <span class="text-gray-600">/2</span>
+                    </p>
+                </div>
                 <button
-                    class="add_btn bg-blue-600 text-white py-1 m-1 rounded-lg shadow hover:bg-blue-700 w-1/3">+</button>
+                    class="add_btn bg-blue-600 hover:bg-blue-500 text-white text-2xl font-bold w-12 h-12 rounded-full shadow-lg transform transition hover:scale-110 flex items-center justify-center mt-3">
+                    +
+                </button>
             </div>
             <div class="div7 hidden sm:block opacity-0"></div>
             <div class="div8 hidden sm:block opacity-0"></div>
@@ -197,7 +276,6 @@
 
             </div>
         </div>
-
         <!-- wehn you click on the plus button it well show a modal of the worker that can access this hall -->
         <div id="add_worker_to_hall_modal"
             class="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 hidden">
@@ -210,8 +288,6 @@
                     Fermer </button>
             </div>
         </div>
-
-
         <div id="modal_of_salles_in_mobile"
             class="fixed inset-0 bg-black/50 bg-opacity-50 flex items-center justify-center z-50 hidden">
             <div class="bg-white w-full max-w-2xl h-5/6 p-3 rounded-xl shadow-lg relative">
@@ -228,7 +304,6 @@
 
             </div>
         </div>
-
         <script src="js/app.js" type="module"></script>
 </body>
 

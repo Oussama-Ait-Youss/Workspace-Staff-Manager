@@ -33,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // Function to render the entire sidebar list
-export function renderSidebar() {
+export function renderSidebar(searchInput = '') {
     const staffData = Data.getStaffData();
     const assignedIds = Array.from(document.querySelectorAll('.assigned-staff-card'))
                              .map(el => Number(el.dataset.staffId));
@@ -42,7 +42,7 @@ export function renderSidebar() {
 
     staffData.forEach(staff => {
         // Only render if NOT currently in a room
-        if (!assignedIds.includes(staff.id)) {
+        if (!assignedIds.includes(staff.id) && staff.name.toLocaleLowerCase().includes(searchInput.toLocaleLowerCase())) {
             const card = UI.createSidebarCard(staff);
             els.staffList.appendChild(card);
 
@@ -52,6 +52,15 @@ export function renderSidebar() {
                 handleDelete(staff.id);
             });
         }
+    });
+}
+const searchInput = document.getElementById('search_staff');
+
+if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+        // e.target.value gets the text CURRENTLY inside the input
+        const text = e.target.value; 
+        renderSidebar(text); 
     });
 }
 
